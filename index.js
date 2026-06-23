@@ -26,7 +26,27 @@ app.use((req, res, next) => {
 
 // O(1) Instant Lookup Set
 const ALLOWED_TIMEZONES = new Set([
-    "Australia/Sydney", "Australia/Melbourne", "Australia/Brisbane", "Australia/Adelaide", "Australia/Perth", "Australia/Hobart", "Australia/Darwin"
+    // Australia
+    "Australia/Sydney", "Australia/Melbourne", "Australia/Brisbane", 
+    "Australia/Adelaide", "Australia/Perth", "Australia/Hobart", "Australia/Darwin",
+
+    // USA
+    "America/New_York",      // Eastern
+    "America/Chicago",       // Central
+    "America/Denver",        // Mountain
+    "America/Phoenix",       // Mountain (no DST)
+    "America/Los_Angeles",   // Pacific
+    "America/Anchorage",     // Alaska
+    "Pacific/Honolulu",      // Hawaii
+
+    // Canada
+    "America/St_Johns",      // Newfoundland
+    "America/Halifax",       // Atlantic
+    "America/Toronto",       // Eastern
+    "America/Winnipeg",      // Central
+    "America/Regina",        // Central (no DST)
+    "America/Edmonton",      // Mountain
+    "America/Vancouver"      // Pacific
 ]);
 
 // Raw URLs accompanied by their selection probability weights (Must total 1.0)
